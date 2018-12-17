@@ -53,8 +53,16 @@ PID=$(cat ${string_pwd}"/${jar_name}_pid.pid")
 sudo kill -9 $PID
 echo "kill当前jar运行进程(${PID})········································OK"
 fi
-#nohup java -jar ${string} >${string_pwd}"/init.out" & >${string_pwd}"/FILEPID.pid"
 nohup java -jar ${string} >${string_pwd}"/${jar_name}_init.out" & echo $! > ${string_pwd}"/${jar_name}_pid.pid"
+count=0
+while [ ${count} -lt 1 ]; do
+    echo -e ".\c"
+    sleep 1
+    count=`ps -ef | grep java | grep ${jar_name} | awk '{print $2}' | wc -l`
+    if [ ${count} -gt 0 ]; then
+        break
+    fi
+done
 echo "运行jar文件>>>"${jar_name}"···············································OK"
 ```
 配合alias命令使用
