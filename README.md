@@ -69,3 +69,23 @@ echo "运行jar文件>>>"${jar_name}"·····················�
 ```
 alias startjar="/www/ctl/jar.sh"
 ```
+
+## jenkins自动部署脚本
+```
+#!/bin/bash -iel
+if [ ! -d "/www/autoDeploy/tracking" ];then
+mkdir /www/autoDeploy/tracking
+else
+rm -rf /www/autoDeploy/tracking
+mkdir /www/autoDeploy/tracking
+fi
+svn --force --username  maxiaojie  --password xx000000  export svn://39.xxx.xx.38/tracking/trunk/tracking /www/autoDeploy/tracking
+cd /www/autoDeploy/tracking
+mvn clean install -Dmaven.test.skip=true
+cd target
+cp tracking-0.0.1-SNAPSHOT.jar /www/app/tracking/tracking-0.0.1-SNAPSHOT.jar
+rm -rf /www/autoDeploy/tracking
+cd /www/app/tracking
+startjar /www/app/tracking/tracking-0.0.1-SNAPSHOT.jar
+echo "Get it all done!"
+```
