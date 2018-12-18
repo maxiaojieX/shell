@@ -70,6 +70,56 @@ echo "运行jar文件>>>"${jar_name}"·····················�
 alias startjar="/www/ctl/jar.sh"
 ```
 
+## jar文件启动优化shell
+```
+#!/bin/bash
+string=$1;
+string_pwd=${string%/*}
+jar_name=${string##*/}
+OLD_PIDS=0
+OLD_PIDS=`ps -ef | grep java | grep "${jar_name}" | awk '{print $2}'`
+echo -e "\033[33m 执行关闭当前项目旧进程 \033[0m"
+if [ ${OLD_PIDS} -gt 0 ]; then
+sudo kill -9 ${OLD_PIDS}
+fi
+num_kill=0
+while true
+do
+    let num_kill++
+    PI=`ps -ef | grep java | grep "${jar_name}" | awk '{print $2}'`
+    if [ !${PI} ];then
+        break
+    fi
+    echo -e ".\c"
+    sleep 1
+    if [ ${num_kill} -gt 30 ]; then
+        echo -e "\033[31m 关闭当前项目旧进程失败,已退出shell,请检查并重新操作 \033[0m"
+        exit 1
+    fi
+done
+nohup java -jar ${string} >/dev/null 2>&1&
+num=0
+count=0
+while [ ${count} -lt 1 ]; do
+    let num++
+    echo -e ".\c"
+    sleep 1
+    count=`ps -ef | grep java | grep ${jar_name} | awk '{print $2}' | wc -l`
+    if [ ${count} -gt 0 ]; then
+        break
+    fi
+    if [ ${num} -gt 30 ]; then
+        break
+    fi
+done
+if [ ${count} -gt 0 ];then
+NOW_PIDS=`ps -ef | grep java | grep "${jar_name}" | awk '{print $2}'`
+echo -e "\033[36m 运行:"${jar_name}"成功,端口:"${NOW_PIDS}" \033[0m"
+else echo -e "\033[31m 启动失败 \033[0m"
+fi
+
+```
+
 ## jenkins自动部署脚本
 ```
 #!/bin/bash -iel
